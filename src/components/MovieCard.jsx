@@ -1,7 +1,18 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link as RouterLink } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Star, Calendar, Eye } from 'lucide-react';
+import { 
+  Box, 
+  Image, 
+  Heading, 
+  Text, 
+  HStack, 
+  Badge, 
+  Icon, 
+  VStack,
+  Link
+} from '@chakra-ui/react';
 import { TMDB_IMAGE_BASE_URL, IMAGE_SIZES } from '../utils/constants';
 import WatchlistButton from './WatchlistButton';
 
@@ -15,68 +26,141 @@ const MovieCard = ({ movie, index = 0 }) => {
     : 'TBA';
 
   return (
-    <motion.div
+    <Box
+      as={motion.div}
       initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: index * 0.1 }}
-      whileHover={{ y: -8, scale: 1.02 }}
-      className="card group cursor-pointer relative"
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.5, delay: index * 0.05 }}
+      whileHover={{ y: -10, scale: 1.05 }}
+      position="relative"
+      rounded="2xl"
+      overflow="hidden"
+      cursor="pointer"
+      role="group"
+      bg="gray.900"
+      boxShadow="0 10px 30px rgba(0,0,0,0.5)"
     >
-      <Link to={`/movie/${movie.id}`} className="block">
+      <Link as={RouterLink} to={`/movie/${movie.id}`} _hover={{ textDecoration: 'none' }}>
         {/* Poster */}
-        <div className="relative overflow-hidden rounded-t-xl aspect-[2/3]">
-          <img
+        <Box position="relative" aspectRatio={2/3}>
+          <Image
             src={posterUrl}
             alt={movie.title}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+            width="full"
+            height="full"
+            objectFit="cover"
+            transition="transform 0.5s"
+            _groupHover={{ scale: 1.1 }}
             loading="lazy"
           />
           
-          {/* Overlay on hover */}
-          <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-60 transition-all duration-300 flex items-center justify-center">
-            <Eye className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          </div>
+          {/* Overlay */}
+          <Box
+            position="absolute"
+            inset="0"
+            bgGradient="linear(to-t, blackAlpha.800, transparent 60%)"
+            transition="all 0.3s"
+            opacity={0.8}
+            _groupHover={{ opacity: 1 }}
+          />
 
           {/* Rating Badge */}
           {movie.vote_average > 0 && (
-            <div className="absolute top-2 left-2 bg-black bg-opacity-80 rounded-full px-2 py-1 flex items-center space-x-1">
-              <Star className="w-3 h-3 text-yellow-400 fill-current" />
-              <span className="text-xs font-medium">
+            <HStack 
+              position="absolute"
+              top={3}
+              left={3}
+              bg="blackAlpha.600"
+              backdropFilter="blur(10px)"
+              px={2}
+              py={1}
+              rounded="lg"
+              gap={1}
+              zIndex={2}
+            >
+              <Icon as={Star} boxSize={3} color="yellow.400" fill="yellow.400" />
+              <Text fontSize="xs" fontWeight="black" color="white">
                 {movie.vote_average.toFixed(1)}
-              </span>
-            </div>
+              </Text>
+            </HStack>
           )}
-        </div>
 
-        {/* Movie Info */}
-        <div className="p-4">
-          <h3 className="font-semibold text-lg mb-2 line-clamp-2 group-hover:text-primary-400 transition-colors">
+          {/* Watchlist Button Overlay */}
+          <Box position="absolute" top={3} right={3} zIndex={5}>
+            <WatchlistButton movie={movie} />
+          </Box>
+        </Box>
+
+        {/* Content */}
+        <VStack
+          position="absolute"
+          bottom={0}
+          left={0}
+          right={0}
+          p={4}
+          align="flex-start"
+          gap={2}
+          zIndex={2}
+        >
+          <Heading
+            size="sm"
+            color="white"
+            noOfLines={1}
+            fontWeight="black"
+            textShadow="0 2px 4px rgba(0,0,0,0.5)"
+          >
             {movie.title}
-          </h3>
+          </Heading>
           
-          <div className="flex items-center justify-between text-sm text-dark-400 mb-3">
-            <div className="flex items-center space-x-1">
-              <Calendar className="w-4 h-4" />
-              <span>{releaseYear}</span>
-            </div>
+          <HStack gap={2}>
+            <Badge
+              bg="whiteAlpha.100"
+              color="whiteAlpha.800"
+              variant="outline"
+              borderColor="whiteAlpha.300"
+              backdropFilter="blur(10px)"
+              px={2}
+              py={0.5}
+              rounded="full"
+              fontSize="10px"
+              fontWeight="bold"
+            >
+              {releaseYear}
+            </Badge>
             {movie.vote_count > 0 && (
-              <span>{movie.vote_count} votes</span>
+              <Badge
+                bg="whiteAlpha.100"
+                color="whiteAlpha.800"
+                variant="outline"
+                borderColor="whiteAlpha.300"
+                backdropFilter="blur(10px)"
+                px={2}
+                py={0.5}
+                rounded="full"
+                fontSize="10px"
+                fontWeight="bold"
+              >
+                {movie.vote_count} votes
+              </Badge>
             )}
-          </div>
+          </HStack>
+        </VStack>
 
-          {movie.overview && (
-            <p className="text-sm text-dark-300 line-clamp-3 mb-3">
-              {movie.overview}
-            </p>
-          )}
-        </div>
+        {/* Hover Glow */}
+        <Box
+          position="absolute"
+          inset={0}
+          border="1px solid transparent"
+          rounded="2xl"
+          transition="all 0.3s"
+          _groupHover={{
+            borderColor: "rgba(120, 100, 255, 0.4)",
+            boxShadow: "inset 0 0 20px rgba(120, 100, 255, 0.1)"
+          }}
+        />
       </Link>
-
-      {/* Watchlist Button */}
-      <div className="absolute top-2 right-2">
-        <WatchlistButton movie={movie} />
-      </div>
-    </motion.div>
+    </Box>
   );
 };
 

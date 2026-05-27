@@ -1,21 +1,22 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { Center, Spinner } from '@chakra-ui/react';
 
 const LoadingSpinner = ({ size = 'md' }) => {
-  const sizeClasses = {
-    sm: 'w-4 h-4',
-    md: 'w-8 h-8',
-    lg: 'w-12 h-12',
+  const chakraSizes = {
+    sm: 'xs',
+    md: 'md',
+    lg: 'xl',
   };
 
   return (
-    <div className="flex justify-center items-center py-8">
-      <motion.div
-        animate={{ rotate: 360 }}
-        transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-        className={`border-4 border-dark-700 border-t-primary-500 rounded-full ${sizeClasses[size]}`}
+    <Center py={8}>
+      <Spinner
+        size={chakraSizes[size]}
+        color="blue.500"
+        borderWidth="4px"
+        animationDuration="0.8s"
       />
-    </div>
+    </Center>
   );
 };
 

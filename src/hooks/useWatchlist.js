@@ -4,7 +4,7 @@ export const useWatchlist = () => {
   const [watchlist, setWatchlist] = useState([]);
 
   useEffect(() => {
-    const savedWatchlist = localStorage.getItem('moviespot-watchlist');
+    const savedWatchlist = localStorage.getItem('filme-watchlist') || localStorage.getItem('moviespot-watchlist');
     if (savedWatchlist) {
       setWatchlist(JSON.parse(savedWatchlist));
     }
@@ -13,13 +13,13 @@ export const useWatchlist = () => {
   const addToWatchlist = (movie) => {
     const newWatchlist = [...watchlist, movie];
     setWatchlist(newWatchlist);
-    localStorage.setItem('moviespot-watchlist', JSON.stringify(newWatchlist));
+    localStorage.setItem('filme-watchlist', JSON.stringify(newWatchlist));
   };
 
   const removeFromWatchlist = (movieId) => {
     const newWatchlist = watchlist.filter(movie => movie.id !== movieId);
     setWatchlist(newWatchlist);
-    localStorage.setItem('moviespot-watchlist', JSON.stringify(newWatchlist));
+    localStorage.setItem('filme-watchlist', JSON.stringify(newWatchlist));
   };
 
   const isInWatchlist = (movieId) => {

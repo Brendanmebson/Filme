@@ -28,7 +28,7 @@ export const tmdbApi = {
   // Get movie details
   getMovieDetails: (movieId) => 
     api.get(`/movie/${movieId}`, { 
-      params: { append_to_response: 'credits,videos,similar' } 
+      params: { append_to_response: 'credits,videos,similar,images,reviews,recommendations' } 
     }),
 
   // Search movies
@@ -46,6 +46,14 @@ export const tmdbApi = {
   // Get trending movies
   getTrendingMovies: (timeWindow = 'day') => 
     api.get(`/trending/movie/${timeWindow}`),
+
+  // Discover movies with custom filters
+  discoverMovies: (params) => 
+    api.get('/discover/movie', { params }),
+
+  // Discover TV shows with custom filters
+  discoverTV: (params) => 
+    api.get('/discover/tv', { params }),
 };
 
 export default tmdbApi;

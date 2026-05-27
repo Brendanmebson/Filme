@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, X } from 'lucide-react';
+import { Box, Input, IconButton, Icon } from '@chakra-ui/react';
+import { InputGroup } from '@/components/ui/input-group';
 
 const SearchBar = () => {
   const [query, setQuery] = useState('');
@@ -18,27 +20,37 @@ const SearchBar = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="relative">
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-dark-400 w-5 h-5" />
-        <input
-          type="text"
+    <Box as="form" onSubmit={handleSubmit} width="full" position="relative">
+      <InputGroup
+        flex="1"
+        startElement={<Icon as={Search} color="gray.400" />}
+        endElement={
+          query && (
+            <IconButton
+              aria-label="Clear search"
+              variant="ghost"
+              size="sm"
+              color="gray.400"
+              _hover={{ color: "white" }}
+              onClick={clearSearch}
+            >
+              <Icon as={X} />
+            </IconButton>
+          )
+        }
+      >
+        <Input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search movies..."
-          className="input-field w-full pl-10 pr-10"
+          bg="gray.800"
+          border="1px solid"
+          borderColor="gray.700"
+          _focus={{ borderColor: "blue.500", ring: "1px", ringColor: "blue.500" }}
+          borderRadius="lg"
         />
-        {query && (
-          <button
-            type="button"
-            onClick={clearSearch}
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-dark-400 hover:text-white"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        )}
-      </div>
-    </form>
+      </InputGroup>
+    </Box>
   );
 };
 

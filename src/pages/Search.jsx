@@ -1,6 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { 
+  Box, 
+  Container, 
+  Heading, 
+  Text, 
+  Center, 
+  VStack, 
+  Button 
+} from '@chakra-ui/react';
 import { useSearchMovies } from '../hooks/useMovies';
 import MovieGrid from '../components/MovieGrid';
 import SearchBar from '../components/SearchBar';
@@ -23,74 +32,95 @@ const Search = () => {
   };
 
   return (
-    <motion.div
+    <Box
+      as={motion.div}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="container mx-auto px-4 py-8"
+      pt="120px"
+      pb="80px"
     >
-      {/* Search Header */}
-      <div className="text-center mb-8">
-        <h1 className="text-3xl md:text-4xl font-bold mb-4">
-          Search Movies
-        </h1>
-        <div className="max-w-md mx-auto">
-          <SearchBar />
-        </div>
-      </div>
-
-      {/* Search Results */}
-      {query && (
-        <div className="mb-6">
-          <p className="text-dark-400">
-            {loading && page === 1 ? (
-              'Searching...'
-            ) : (
-              <>
-                {movies.length > 0 
-                  ? `Found ${movies.length} result${movies.length !== 1 ? 's' : ''} for "${query}"`
-                  : `No results found for "${query}"`
-                }
-              </>
-            )}
-          </p>
-        </div>
-      )}
-
-      {error && (
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-red-500 mb-4">Error</h2>
-          <p className="text-dark-400">{error}</p>
-        </div>
-      )}
-
-      {!query && !loading && (
-        <div className="text-center py-12">
-          <div className="text-6xl mb-4">🔍</div>
-          <h3 className="text-xl font-semibold mb-2">Start searching</h3>
-          <p className="text-dark-400">Enter a movie title to get started</p>
-        </div>
-      )}
-
-      {query && <MovieGrid movies={movies} loading={loading && page === 1} />}
-
-      {/* Load More Button */}
-      {!loading && movies.length > 0 && page < totalPages && (
-        <div className="text-center mt-12">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={loadMore}
-            className="btn-primary px-8 py-3 text-lg"
+      <Container maxW="container.2xl" px={{ base: 6, md: 12 }}>
+        {/* Search Header */}
+        <VStack mb={12} gap={8} align="flex-start">
+          <Heading 
+            as="h1" 
+            fontSize={{ base: '3xl', md: '5xl' }} 
+            fontWeight="black"
+            color="white"
+            letterSpacing="tight"
           >
-            Load More Results
-          </motion.button>
-        </div>
-      )}
+            SEARCH MOVIES
+          </Heading>
+          <Box width="full" maxW="lg">
+            <SearchBar />
+          </Box>
+        </VStack>
 
-      {/* Loading More */}
-      {loading && page > 1 && <LoadingSpinner />}
-    </motion.div>
+        {/* Search Results */}
+        {query && (
+          <Box mb={8}>
+            <Text color="whiteAlpha.600" fontSize="lg" fontWeight="medium">
+              {loading && page === 1 ? (
+                'Searching...'
+              ) : (
+                <>
+                  {movies.length > 0 
+                    ? `Found ${movies.length} result${movies.length !== 1 ? 's' : ''} for "${query}"`
+                    : `No results found for "${query}"`
+                  }
+                </>
+              )}
+            </Text>
+          </Box>
+        )}
+
+        {error && (
+          <Center flexDirection="column" py={20}>
+            <Heading size="lg" color="red.500" mb={4}>Error</Heading>
+            <Text color="whiteAlpha.600">{error}</Text>
+          </Center>
+        )}
+
+        {!query && !loading && (
+          <Center py={24} flexDirection="column">
+            <Text fontSize="6xl" mb={4}>🔍</Text>
+            <Heading size="lg" mb={4} color="white" fontWeight="black">Start searching</Heading>
+            <Text color="whiteAlpha.600" fontSize="lg">Enter a movie title to get started</Text>
+          </Center>
+        )}
+
+        {query && <MovieGrid movies={movies} loading={loading && page === 1} />}
+
+        {/* Load More Button */}
+        {!loading && movies.length > 0 && page < totalPages && (
+          <Center mt={24}>
+            <Button
+              as={motion.button}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={loadMore}
+              size="xl"
+              variant="outline"
+              borderColor="whiteAlpha.300"
+              color="white"
+              rounded="full"
+              px={12}
+              py={8}
+              fontSize="sm"
+              fontWeight="black"
+              letterSpacing="widest"
+              _hover={{ bg: "purple.600", borderColor: "purple.500", boxShadow: "0 0 20px rgba(120, 100, 255, 0.4)" }}
+            >
+              LOAD MORE RESULTS
+            </Button>
+          </Center>
+        )}
+
+        {/* Loading More */}
+        {loading && page > 1 && <LoadingSpinner />}
+      </Container>
+    </Box>
   );
 };
 

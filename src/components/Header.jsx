@@ -1,7 +1,21 @@
 import React from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link as RouterLink, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Film, Home, Bookmark, Search } from 'lucide-react';
+import { 
+  Box, 
+  Flex, 
+  HStack, 
+  Link, 
+  IconButton, 
+  Container, 
+  Text,
+  Icon,
+  Heading,
+  Image
+} from '@chakra-ui/react';
+import { MenuRoot, MenuTrigger, MenuContent, MenuItem } from './ui/menu';
+import { Menu } from 'lucide-react';
 import SearchBar from './SearchBar';
 
 const Header = () => {
@@ -11,66 +25,136 @@ const Header = () => {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <motion.header
+    <Box
+      as={motion.header}
       initial={{ y: -100 }}
       animate={{ y: 0 }}
-      className="bg-dark-800 shadow-lg sticky top-0 z-50"
+      bg="rgba(10, 10, 15, 0.7)"
+      backdropFilter="blur(20px)"
+      borderBottom="1px solid"
+      borderColor="whiteAlpha.100"
+      position="sticky"
+      top="0"
+      zIndex="50"
+      py={3}
     >
-      <div className="container mx-auto px-4 py-4">
-        <div className="flex items-center justify-between">
+      <Container maxW="container.2xl">
+        <Flex align="center" justify="space-between">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
-            <Film className="w-8 h-8 text-primary-500" />
-            <span className="text-2xl font-bold text-white">MovieSpot</span>
+          <Link 
+            as={RouterLink} 
+            to="/" 
+            _hover={{ textDecoration: 'none' }}
+            display="flex"
+            alignItems="center"
+            gap={3}
+          >
+            <Box 
+              w="32px" 
+              h="32px" 
+              bg="purple.600" 
+              rounded="lg" 
+              p={1.5}
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              boxShadow="0 0 20px rgba(120, 100, 255, 0.4)"
+            >
+              <Image src="/src/assets/video-player.png" alt="Filme" />
+            </Box>
+            <Heading
+              fontSize="2xl"
+              fontWeight="black"
+              letterSpacing="tighter"
+              color="white"
+            >
+              Filme
+            </Heading>
           </Link>
 
           {/* Search Bar - Hidden on mobile */}
-          <div className="hidden md:block flex-1 max-w-md mx-8">
+          <Box display={{ base: 'none', md: 'block' }} flex="1" maxW="md" mx={8}>
             <SearchBar />
-          </div>
+          </Box>
 
-          {/* Navigation */}
-          <nav className="flex items-center space-x-6">
+          {/* Navigation - Hidden on Mobile */}
+          <HStack gap={6} display={{ base: 'none', lg: 'flex' }}>
             <Link
+              as={RouterLink}
               to="/"
-              className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${
-                isActive('/') 
-                  ? 'bg-primary-600 text-white' 
-                  : 'text-dark-300 hover:text-white hover:bg-dark-700'
-              }`}
+              px={4}
+              py={2}
+              rounded="full"
+              fontSize="xs"
+              fontWeight="black"
+              letterSpacing="widest"
+              bg={isActive('/') ? 'purple.600' : 'transparent'}
+              color="white"
+              boxShadow={isActive('/') ? '0 0 15px rgba(120, 100, 255, 0.4)' : 'none'}
+              _hover={{ 
+                bg: isActive('/') ? 'purple.700' : 'whiteAlpha.100',
+                textDecoration: 'none'
+              }}
             >
-              <Home className="w-5 h-5" />
-              <span className="hidden sm:inline">Home</span>
+              HOME
             </Link>
             
             <Link
+              as={RouterLink}
               to="/watchlist"
-              className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${
-                isActive('/watchlist') 
-                  ? 'bg-primary-600 text-white' 
-                  : 'text-dark-300 hover:text-white hover:bg-dark-700'
-              }`}
+              px={4}
+              py={2}
+              rounded="full"
+              fontSize="xs"
+              fontWeight="black"
+              letterSpacing="widest"
+              bg={isActive('/watchlist') ? 'purple.600' : 'transparent'}
+              color="white"
+              boxShadow={isActive('/watchlist') ? '0 0 15px rgba(120, 100, 255, 0.4)' : 'none'}
+              _hover={{ 
+                bg: isActive('/watchlist') ? 'purple.700' : 'whiteAlpha.100',
+                textDecoration: 'none'
+              }}
             >
-              <Bookmark className="w-5 h-5" />
-              <span className="hidden sm:inline">Watchlist</span>
+              WATCHLIST
             </Link>
 
             {/* Mobile Search Button */}
-            <button 
-              className="md:hidden p-2 text-dark-300 hover:text-white hover:bg-dark-700 rounded-lg"
+            <IconButton 
+              display={{ base: 'flex', md: 'none' }}
+              aria-label="Search"
+              variant="ghost"
+              color="gray.300"
+              _hover={{ color: 'white', bg: 'gray.800' }}
               onClick={() => navigate('/search')}
-            >
-              <Search className="w-5 h-5" />
-            </button>
-          </nav>
-        </div>
+              icon={<Search />}
+            />
+          </HStack>
+
+          {/* Mobile Hamburger Menu */}
+          <Box display={{ base: 'block', lg: 'none' }}>
+            <MenuRoot>
+              <MenuTrigger asChild>
+                <IconButton variant="ghost" color="white" aria-label="Menu" rounded="full" _hover={{ bg: "whiteAlpha.200" }}>
+                  <Menu />
+                </IconButton>
+              </MenuTrigger>
+              <MenuContent bg="gray.900" color="white" borderColor="whiteAlpha.100" minW="200px" boxShadow="xl">
+                <MenuItem value="home" _hover={{ bg: "purple.600" }} onClick={() => navigate('/')}>Home</MenuItem>
+                <MenuItem value="trending" _hover={{ bg: "purple.600" }} onClick={() => navigate('/trending')}>Trending</MenuItem>
+                <MenuItem value="watchlist" _hover={{ bg: "purple.600" }} onClick={() => navigate('/watchlist')}>Watchlist</MenuItem>
+                <MenuItem value="search" _hover={{ bg: "purple.600" }} onClick={() => navigate('/search')}>Search Movies</MenuItem>
+              </MenuContent>
+            </MenuRoot>
+          </Box>
+        </Flex>
 
         {/* Mobile Search Bar */}
-        <div className="md:hidden mt-4">
+        <Box display={{ base: 'block', md: 'none' }} mt={4}>
           <SearchBar />
-        </div>
-      </div>
-    </motion.header>
+        </Box>
+      </Container>
+    </Box>
   );
 };
 

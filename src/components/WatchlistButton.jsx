@@ -1,7 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Bookmark, BookmarkPlus } from 'lucide-react';
+import { Heart } from 'lucide-react';
+import { IconButton, Icon } from '@chakra-ui/react';
 import { useWatchlist } from '../hooks/useWatchlist';
+import { toaster } from './ui/toaster';
 
 const WatchlistButton = ({ movie }) => {
   const { isInWatchlist, toggleWatchlist } = useWatchlist();
@@ -11,26 +13,43 @@ const WatchlistButton = ({ movie }) => {
     e.preventDefault();
     e.stopPropagation();
     toggleWatchlist(movie);
+    
+    toaster.create({
+      title: inWatchlist ? "Removed from Wishlist" : "Added to Wishlist",
+      type: inWatchlist ? "info" : "success",
+      duration: 3000,
+    });
   };
 
   return (
-    <motion.button
-      whileHover={{ scale: 1.1 }}
+    <IconButton
+      as={motion.button}
+      whileHover={{ scale: 1.15 }}
       whileTap={{ scale: 0.9 }}
       onClick={handleClick}
-      className={`p-2 rounded-full shadow-lg transition-colors ${
-        inWatchlist 
-          ? 'bg-primary-600 text-white' 
-          : 'bg-black bg-opacity-50 text-white hover:bg-opacity-70'
-      }`}
-      title={inWatchlist ? 'Remove from watchlist' : 'Add to watchlist'}
+      aria-label={inWatchlist ? 'Remove from wishlist' : 'Add to wishlist'}
+      variant={inWatchlist ? "solid" : "outline"}
+      colorPalette="pink"
+      borderRadius="full"
+      boxShadow={inWatchlist ? "0 0 20px rgba(213, 63, 140, 0.4)" : "none"}
+      border="1px solid"
+      borderColor={inWatchlist ? "transparent" : "whiteAlpha.300"}
+      bg={inWatchlist ? "pink.600" : "transparent"}
+      color={inWatchlist ? "white" : "whiteAlpha.800"}
+      _hover={{ 
+        bg: inWatchlist ? "pink.500" : "whiteAlpha.100",
+        borderColor: "pink.400",
+        color: "pink.400"
+      }}
     >
-      {inWatchlist ? (
-        <BookmarkCheck className="w-4 h-4" />
-      ) : (
-        <Bookmark className="w-4 h-4" />
-      )}
-    </motion.button>
+      <Icon 
+        as={Heart} 
+        boxSize={5}
+        fill={inWatchlist ? "pink.500" : "transparent"} 
+        color={inWatchlist ? "pink.500" : "white"}
+        strokeWidth={inWatchlist ? 1 : 2}
+      />
+    </IconButton>
   );
 };
 
