@@ -21,9 +21,13 @@ const MovieCard = ({ movie, index = 0 }) => {
     ? `${TMDB_IMAGE_BASE_URL}${IMAGE_SIZES.poster}${movie.poster_path}`
     : '/placeholder-movie.jpg';
 
-  const releaseYear = movie.release_date 
-    ? new Date(movie.release_date).getFullYear()
+  const releaseDate = movie.release_date || movie.first_air_date;
+  const releaseYear = releaseDate 
+    ? new Date(releaseDate).getFullYear()
     : 'TBA';
+
+  const title = movie.title || movie.name || '';
+  const isTv = !movie.title && !!movie.name;
 
   return (
     <Box
@@ -41,12 +45,12 @@ const MovieCard = ({ movie, index = 0 }) => {
       bg="gray.900"
       boxShadow="0 10px 30px rgba(0,0,0,0.5)"
     >
-      <Link as={RouterLink} to={`/movie/${movie.id}`} _hover={{ textDecoration: 'none' }}>
+      <Link as={RouterLink} to={isTv ? `/tv/${movie.id}` : `/movie/${movie.id}`} _hover={{ textDecoration: 'none' }}>
         {/* Poster */}
         <Box position="relative" aspectRatio={2/3}>
           <Image
             src={posterUrl}
-            alt={movie.title}
+            alt={title}
             width="full"
             height="full"
             objectFit="cover"
@@ -110,7 +114,7 @@ const MovieCard = ({ movie, index = 0 }) => {
             fontWeight="black"
             textShadow="0 2px 4px rgba(0,0,0,0.5)"
           >
-            {movie.title}
+            {title}
           </Heading>
           
           <HStack gap={2}>

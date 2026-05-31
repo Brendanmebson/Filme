@@ -11,8 +11,16 @@ import {
 } from '@chakra-ui/react';
 import { motion } from 'framer-motion';
 import { Star } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const DiscoveryCard = ({ movie, delay = 0 }) => {
+  const navigate = useNavigate();
+  const isTv = movie.isTv || (!movie.title && !!movie.name);
+  
+  const handleClick = () => {
+    navigate(isTv ? `/tv/${movie.id}` : `/movie/${movie.id}`);
+  };
+
   // Random platform logos for demo purposes
   const platforms = [
     { name: 'HBO', logo: 'https://upload.wikimedia.org/wikipedia/commons/d/de/HBO_logo.svg' },
@@ -25,6 +33,7 @@ const DiscoveryCard = ({ movie, delay = 0 }) => {
     <Box
       as={motion.div}
       whileHover={{ y: -10, scale: 1.05 }}
+      onClick={handleClick}
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}

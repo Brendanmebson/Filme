@@ -1,5 +1,5 @@
 import React from 'react';
-import { useParams, Navigate, Link as RouterLink } from 'react-router-dom';
+import { useParams, Navigate, Link as RouterLink, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Star, Calendar, Clock, Globe, Play, Users } from 'lucide-react';
 import {
@@ -29,7 +29,9 @@ import MovieCard from '../components/MovieCard';
 
 const MovieDetail = () => {
   const { id } = useParams();
-  const { movie, loading, error } = useMovieDetail(id);
+  const location = useLocation();
+  const isTv = location.pathname.startsWith('/tv');
+  const { movie, loading, error } = useMovieDetail(id, isTv ? 'tv' : 'movie');
 
   if (loading) {
     return (
@@ -51,19 +53,24 @@ const MovieDetail = () => {
     ? `${TMDB_IMAGE_BASE_URL}${IMAGE_SIZES.poster}${movie.poster_path}`
     : '/placeholder-movie.jpg';
 
-  const releaseYear = movie.release_date
-    ? new Date(movie.release_date).getFullYear()
+  const releaseDate = movie.release_date || movie.first_air_date;
+  const releaseYear = releaseDate
+    ? new Date(releaseDate).getFullYear()
     : 'TBA';
 
-  const runtime = movie.runtime
-    ? `${Math.floor(movie.runtime / 60)}h ${movie.runtime % 60}m`
+  const runtimeVal = movie.runtime || (movie.episode_run_time && movie.episode_run_time[0]) || 0;
+  const runtime = runtimeVal
+    ? runtimeVal >= 60
+      ? `${Math.floor(runtimeVal / 60)}h ${runtimeVal % 60}m`
+      : `${runtimeVal}m`
     : 'N/A';
 
   const trailer = movie.videos?.results?.find(
     (video) => video.type === 'Trailer' && video.site === 'YouTube'
   );
 
-  const director = movie.credits?.crew?.find(c => c.job === 'Director');
+  const creatorName = movie.created_by && movie.created_by[0] ? movie.created_by[0].name : null;
+  const director = movie.credits?.crew?.find(c => c.job === 'Director') || (creatorName ? { name: creatorName } : null);
   const writers = movie.credits?.crew?.filter(c => ['Writer', 'Screenplay', 'Author'].includes(c.job)).slice(0, 3);
   const producers = movie.credits?.crew?.filter(c => c.job === 'Producer').slice(0, 3);
 
@@ -74,6 +81,8 @@ const MovieDetail = () => {
       maximumFractionDigits: 0,
     }).format(amount);
   };
+
+  const title = movie.title || movie.name || '';
 
   return (
     <Box
@@ -120,7 +129,7 @@ const MovieDetail = () => {
               initial={{ y: 50, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              w={{ base: '260px', lg: '340px' }}
+              w={{ base: '200px', sm: '260px', lg: '340px' }}
               flexShrink="0"
               rounded="3xl"
               overflow="hidden"
@@ -128,7 +137,7 @@ const MovieDetail = () => {
               border="1px solid"
               borderColor="whiteAlpha.200"
             >
-              <Image src={posterUrl} alt={movie.title} w="100%" />
+              <Image src={posterUrl} alt={title} w="100%" />
             </Box>
 
             {/* Movie Info Glass Panel */}
@@ -149,17 +158,17 @@ const MovieDetail = () => {
               boxShadow="0 20px 50px rgba(0,0,0,0.3)"
             >
               <VStack align="flex-start" gap={3} w="100%">
-                <Flex w="100%" justify="space-between" align="center">
-                  <HStack gap={4}>
+                <Flex w="100%" justify="space-between" align={{ base: 'flex-start', sm: 'center' }} direction={{ base: 'column', sm: 'row' }} gap={{ base: 4, sm: 0 }}>
+                  <Flex gap={2} wrap="wrap" mb={{ base: 2, sm: 0 }}>
                     {movie.genres?.slice(0, 3).map((genre) => (
                       <Badge
                         key={genre.id}
                         bg="purple.600"
                         color="white"
-                        px={3}
+                        px={{ base: 2, md: 3 }}
                         py={1}
                         rounded="full"
-                        fontSize="2xs"
+                        fontSize={{ base: "3xs", md: "2xs" }}
                         fontWeight="black"
                         letterSpacing="widest"
                       >
@@ -167,11 +176,11 @@ const MovieDetail = () => {
                       </Badge>
                     ))}
                     {movie.status && (
-                      <Badge bg="whiteAlpha.200" color="white" px={3} py={1} rounded="full" fontSize="2xs" fontWeight="black">
+                      <Badge bg="whiteAlpha.200" color="white" px={{ base: 2, md: 3 }} py={1} rounded="full" fontSize={{ base: "3xs", md: "2xs" }} fontWeight="black">
                         {movie.status.toUpperCase()}
                       </Badge>
                     )}
-                  </HStack>
+                  </Flex>
                   <WatchlistButton movie={movie} />
                 </Flex>
 
@@ -182,18 +191,19 @@ const MovieDetail = () => {
                   color="white"
                   lineHeight="1.1"
                   letterSpacing="tighter"
+                  wordBreak="break-word"
                 >
-                  {movie.title.toUpperCase()}
+                  {title.toUpperCase()}
                 </Heading>
 
                 {movie.tagline && (
-                  <Text fontSize="lg" color="whiteAlpha.600" fontWeight="medium" fontStyle="italic">
+                  <Text fontSize={{ base: 'md', md: 'lg' }} color="whiteAlpha.600" fontWeight="medium" fontStyle="italic">
                     "{movie.tagline}"
                   </Text>
                 )}
               </VStack>
 
-              <HStack gap={8} wrap="wrap">
+              <Flex gap={{ base: 4, md: 8 }} wrap="wrap">
                 <HStack gap={2}>
                   <Icon as={Star} boxSize={5} color="yellow.400" fill="yellow.400" />
                   <Text fontWeight="black" fontSize="xl">{movie.vote_average.toFixed(1)}</Text>
@@ -207,13 +217,13 @@ const MovieDetail = () => {
                   <Icon as={Calendar} boxSize={5} color="whiteAlpha.600" />
                   <Text fontWeight="bold">{releaseYear}</Text>
                 </HStack>
-              </HStack>
+              </Flex>
 
-              <Text color="whiteAlpha.800" fontSize="md" lineHeight="relaxed" noOfLines={4} maxW="800px">
+              <Text color="whiteAlpha.800" fontSize={{ base: 'sm', md: 'md' }} lineHeight="relaxed" noOfLines={4} maxW="800px">
                 {movie.overview}
               </Text>
 
-              <HStack gap={10} py={2}>
+              <Flex gap={{ base: 6, md: 10 }} py={2} wrap="wrap">
                 {director && (
                   <Box>
                     <Text color="whiteAlpha.500" fontSize="xs" fontWeight="black" mb={1}>DIRECTOR</Text>
@@ -226,9 +236,9 @@ const MovieDetail = () => {
                     <Text fontWeight="bold" color="white">{writers.map(w => w.name).join(', ')}</Text>
                   </Box>
                 )}
-              </HStack>
+              </Flex>
 
-              <HStack gap={4}>
+              <Flex gap={4} wrap="wrap" w={{ base: '100%', sm: 'auto' }}>
                 {trailer && (
                   <Button
                     as="a"
@@ -237,11 +247,12 @@ const MovieDetail = () => {
                     rel="noopener noreferrer"
                     bg="white"
                     color="black"
-                    size="xl"
-                    px={10}
-                    py={6}
+                    size={{ base: 'lg', md: 'xl' }}
+                    px={{ base: 6, md: 10 }}
+                    py={{ base: 6, md: 6 }}
+                    w={{ base: '100%', sm: 'auto' }}
                     rounded="full"
-                    fontSize="sm"
+                    fontSize={{ base: 'xs', md: 'sm' }}
                     fontWeight="black"
                     letterSpacing="widest"
                     leftIcon={<Icon as={Play} fill="black" boxSize={4} />}
@@ -260,11 +271,12 @@ const MovieDetail = () => {
                     variant="outline"
                     borderColor="whiteAlpha.300"
                     color="white"
-                    size="xl"
-                    px={10}
-                    py={6}
+                    size={{ base: 'lg', md: 'xl' }}
+                    px={{ base: 6, md: 10 }}
+                    py={{ base: 6, md: 6 }}
+                    w={{ base: '100%', sm: 'auto' }}
                     rounded="full"
-                    fontSize="sm"
+                    fontSize={{ base: 'xs', md: 'sm' }}
                     fontWeight="black"
                     letterSpacing="widest"
                     _hover={{ bg: "whiteAlpha.100", transform: "scale(1.05)" }}
@@ -273,7 +285,7 @@ const MovieDetail = () => {
                     WEBSITE
                   </Button>
                 )}
-              </HStack>
+              </Flex>
             </VStack>
           </Flex>
         </Container>
@@ -431,14 +443,29 @@ const MovieDetail = () => {
                   border="1px solid"
                   borderColor="whiteAlpha.100"
                 >
-                  <Box>
-                    <Text color="whiteAlpha.500" fontSize="xs" fontWeight="black" mb={1}>BUDGET</Text>
-                    <Text color="white" fontWeight="bold">{movie.budget > 0 ? formatCurrency(movie.budget) : 'N/A'}</Text>
-                  </Box>
-                  <Box>
-                    <Text color="whiteAlpha.500" fontSize="xs" fontWeight="black" mb={1}>REVENUE</Text>
-                    <Text color="white" fontWeight="bold">{movie.revenue > 0 ? formatCurrency(movie.revenue) : 'N/A'}</Text>
-                  </Box>
+                  {!isTv ? (
+                    <>
+                      <Box>
+                        <Text color="whiteAlpha.500" fontSize="xs" fontWeight="black" mb={1}>BUDGET</Text>
+                        <Text color="white" fontWeight="bold">{movie.budget > 0 ? formatCurrency(movie.budget) : 'N/A'}</Text>
+                      </Box>
+                      <Box>
+                        <Text color="whiteAlpha.500" fontSize="xs" fontWeight="black" mb={1}>REVENUE</Text>
+                        <Text color="white" fontWeight="bold">{movie.revenue > 0 ? formatCurrency(movie.revenue) : 'N/A'}</Text>
+                      </Box>
+                    </>
+                  ) : (
+                    <>
+                      <Box>
+                        <Text color="whiteAlpha.500" fontSize="xs" fontWeight="black" mb={1}>SEASONS</Text>
+                        <Text color="white" fontWeight="bold">{movie.number_of_seasons || 'N/A'}</Text>
+                      </Box>
+                      <Box>
+                        <Text color="whiteAlpha.500" fontSize="xs" fontWeight="black" mb={1}>EPISODES</Text>
+                        <Text color="white" fontWeight="bold">{movie.number_of_episodes || 'N/A'}</Text>
+                      </Box>
+                    </>
+                  )}
                   <Box>
                     <Text color="whiteAlpha.500" fontSize="xs" fontWeight="black" mb={2}>STUDIOS</Text>
                     <VStack align="flex-start" gap={2}>

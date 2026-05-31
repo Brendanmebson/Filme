@@ -26,8 +26,13 @@ const TopRatedCard = ({ movie, index }) => {
     ? `${TMDB_IMAGE_BASE_URL}/w780${movie.backdrop_path}`
     : '';
 
+  const releaseDate = movie.release_date || movie.first_air_date;
+  const releaseYear = releaseDate ? new Date(releaseDate).getFullYear() : 'TBA';
+  const title = movie.title || movie.name || '';
+  const isTv = !movie.title && !!movie.name;
+
   return (
-    <Link as={RouterLink} to={`/movie/${movie.id}`} _hover={{ textDecoration: 'none' }}>
+    <Link as={RouterLink} to={isTv ? `/tv/${movie.id}` : `/movie/${movie.id}`} _hover={{ textDecoration: 'none' }}>
       <Box
         as={motion.div}
         initial={{ opacity: 0, y: 30 }}
@@ -50,7 +55,7 @@ const TopRatedCard = ({ movie, index }) => {
         {/* Background */}
         <Image
           src={backdropUrl || posterUrl}
-          alt={movie.title}
+          alt={title}
           w="100%"
           h="100%"
           objectFit="cover"
@@ -116,7 +121,7 @@ const TopRatedCard = ({ movie, index }) => {
             noOfLines={1}
             textShadow="0 2px 8px rgba(0,0,0,0.5)"
           >
-            {movie.title}
+            {title}
           </Heading>
 
           <HStack gap={3}>
@@ -129,7 +134,7 @@ const TopRatedCard = ({ movie, index }) => {
               fontSize="2xs"
               fontWeight="black"
             >
-              {movie.release_date ? new Date(movie.release_date).getFullYear() : 'TBA'}
+              {releaseYear}
             </Badge>
             <Text color="whiteAlpha.600" fontSize="xs" fontWeight="bold">
               {movie.vote_count?.toLocaleString()} votes

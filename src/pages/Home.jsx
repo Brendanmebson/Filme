@@ -27,10 +27,11 @@ const Home = () => {
 
   const recommendedMovies = recommendedRaw.map(m => ({
     id: m.id,
-    title: m.title,
+    title: m.title || m.name,
     poster: `${TMDB_IMAGE_BASE_URL}/w500${m.poster_path}`,
-    year: new Date(m.release_date).getFullYear(),
+    year: m.release_date || m.first_air_date ? new Date(m.release_date || m.first_air_date).getFullYear() : 'TBA',
     rating: m.vote_average.toFixed(1),
+    isTv: !m.title && !!m.name,
   }));
 
   const handleCategoryChange = (category) => {
@@ -80,7 +81,7 @@ const Home = () => {
             mb={10}
             letterSpacing="tight"
           >
-            DISCOVER MOVIES
+            DISCOVER
           </Heading>
 
           <CategoryFilter 
@@ -109,7 +110,7 @@ const Home = () => {
                 letterSpacing="widest"
                 _hover={{ bg: "purple.600", borderColor: "purple.500", boxShadow: "0 0 20px rgba(120, 100, 255, 0.4)" }}
               >
-                LOAD MORE MOVIES
+                LOAD MORE
               </Button>
             </Center>
           )}

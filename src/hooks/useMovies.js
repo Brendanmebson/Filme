@@ -14,21 +14,47 @@ export const useMovies = (category = 'popular', page = 1) => {
         setError(null);
         
         let response;
-        switch (category) {
-          case 'popular':
-            response = await tmdbApi.getPopularMovies(page);
-            break;
-          case 'top_rated':
-            response = await tmdbApi.getTopRatedMovies(page);
-            break;
-          case 'upcoming':
-            response = await tmdbApi.getUpcomingMovies(page);
-            break;
-          case 'now_playing':
-            response = await tmdbApi.getNowPlayingMovies(page);
-            break;
-          default:
-            response = await tmdbApi.getPopularMovies(page);
+        if (category === 'popular') {
+          const [movieRes, tvRes] = await Promise.all([
+            tmdbApi.getPopularMovies(page),
+            tmdbApi.getPopularTV(page)
+          ]);
+          const merged = [...movieRes.data.results, ...tvRes.data.results].sort((a, b) => b.popularity - a.popularity);
+          response = {
+            data: {
+              results: merged,
+              total_pages: Math.max(movieRes.data.total_pages, tvRes.data.total_pages)
+            }
+          };
+        } else if (category === 'top_rated') {
+          const [movieRes, tvRes] = await Promise.all([
+            tmdbApi.getTopRatedMovies(page),
+            tmdbApi.getTopRatedTV(page)
+          ]);
+          const merged = [...movieRes.data.results, ...tvRes.data.results].sort((a, b) => b.vote_average - a.vote_average);
+          response = {
+            data: {
+              results: merged,
+              total_pages: Math.max(movieRes.data.total_pages, tvRes.data.total_pages)
+            }
+          };
+        } else {
+          switch (category) {
+            case 'upcoming':
+              response = await tmdbApi.getUpcomingMovies(page);
+              break;
+            case 'now_playing':
+              response = await tmdbApi.getNowPlayingMovies(page);
+              break;
+            case 'movies':
+              response = await tmdbApi.getPopularMovies(page);
+              break;
+            case 'series':
+              response = await tmdbApi.getPopularTV(page);
+              break;
+            default:
+              response = await tmdbApi.getPopularMovies(page);
+          }
         }
         
         setMovies(page === 1 ? response.data.results : prev => [...prev, ...response.data.results]);

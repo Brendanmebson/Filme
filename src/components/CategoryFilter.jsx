@@ -6,7 +6,7 @@ import { MOVIE_CATEGORIES } from '../utils/constants';
 const CategoryFilter = ({ activeCategory, onCategoryChange }) => {
   return (
     <HStack 
-      gap={6} 
+      gap={{ base: 3, md: 6 }} 
       mb={12} 
       bg="rgba(255,255,255,0.03)" 
       p={2} 
@@ -14,7 +14,12 @@ const CategoryFilter = ({ activeCategory, onCategoryChange }) => {
       border="1px solid" 
       borderColor="whiteAlpha.100"
       backdropFilter="blur(10px)"
-      w="fit-content"
+      w={{ base: "100%", md: "fit-content" }}
+      overflowX={{ base: "auto", md: "unset" }}
+      css={{
+        '&::-webkit-scrollbar': { display: 'none' },
+        scrollbarWidth: 'none'
+      }}
     >
       {MOVIE_CATEGORIES.map((category) => (
         <Box
@@ -28,6 +33,7 @@ const CategoryFilter = ({ activeCategory, onCategoryChange }) => {
           rounded="full"
           position="relative"
           cursor="pointer"
+          flexShrink={0}
           transition="all 0.3s"
         >
           {activeCategory === category.id && (

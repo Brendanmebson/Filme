@@ -13,6 +13,8 @@ export const MOVIE_CATEGORIES = [
   { id: 'top_rated', name: 'Top Rated', endpoint: '/movie/top_rated' },
   { id: 'upcoming', name: 'Upcoming', endpoint: '/movie/upcoming' },
   { id: 'now_playing', name: 'Now Playing', endpoint: '/movie/now_playing' },
+  { id: 'movies', name: 'Movies', endpoint: '/movie/popular' },
+  { id: 'series', name: 'Series', endpoint: '/tv/popular' },
 ];
 
 export const GENRES = {

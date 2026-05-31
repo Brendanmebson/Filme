@@ -5,103 +5,131 @@ import { Volume2, VolumeX } from 'lucide-react';
 
 const BackgroundPlayer = ({ videoId, backdrop, isMuted, isPlaying, onToggleMute, onProgress, onVideoEnd }) => {
   const [isReady, setIsReady] = useState(false);
-  const playerRef = useRef(null);
-  const containerRef = useRef(null);
+  // Index 0 = ambient blur layer (always muted), index 1 = main foreground player
+  const playerRefs = useRef([null, null]);
+  const containerRefs = useRef([null, null]);
+
+  const makePlayerVars = (muted) => ({
+    autoplay: 1,
+    mute: muted ? 1 : 0,
+    controls: 0,
+    loop: 0,
+    playlist: videoId,
+    showinfo: 0,
+    rel: 0,
+    iv_load_policy: 3,
+    modestbranding: 1,
+    enablejsapi: 1,
+    origin: window.location.origin,
+  });
 
   useEffect(() => {
-    setIsReady(false); // Reset ready state when videoId changes
-
-    if (!window.YT) {
-      const tag = document.createElement('script');
-      tag.src = 'https://www.youtube.com/iframe_api';
-      const firstScriptTag = document.getElementsByTagName('script')[0];
-      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-    }
-
+    setIsReady(false);
     let interval;
 
-    const createPlayer = () => {
-      playerRef.current = new window.YT.Player(containerRef.current, {
-        videoId: videoId,
-        playerVars: {
-          autoplay: 1,
-          mute: isMuted ? 1 : 0,
-          controls: 0,
-          loop: 0, // Disable internal looping to use our callback
-          playlist: videoId,
-          showinfo: 0,
-          rel: 0,
-          iv_load_policy: 3,
-          modestbranding: 1,
-          enablejsapi: 1,
-          origin: window.location.origin,
-        },
+    const createPlayers = () => {
+      // Ambient player — always silent, just visuals
+      playerRefs.current[0] = new window.YT.Player(containerRefs.current[0], {
+        videoId,
+        playerVars: makePlayerVars(true),
         events: {
-          onReady: (event) => {
-            event.target.playVideo();
-            setIsReady(true);
+          onReady: (e) => e.target.playVideo(),
+        },
+      });
 
+      // Main foreground player
+      playerRefs.current[1] = new window.YT.Player(containerRefs.current[1], {
+        videoId,
+        playerVars: makePlayerVars(isMuted),
+        events: {
+          onReady: (e) => {
+            e.target.playVideo();
+            setIsReady(true);
             interval = setInterval(() => {
-              if (playerRef.current && playerRef.current.getCurrentTime) {
-                const currentTime = playerRef.current.getCurrentTime();
-                const duration = playerRef.current.getDuration();
-                if (duration > 0) {
-                  onProgress({ currentTime, duration });
-                }
+              const p = playerRefs.current[1];
+              if (p && p.getCurrentTime) {
+                const currentTime = p.getCurrentTime();
+                const duration = p.getDuration();
+                if (duration > 0) onProgress({ currentTime, duration });
               }
             }, 1000);
           },
-          onStateChange: (event) => {
-            if (event.data === window.YT.PlayerState.ENDED) {
-              if (onVideoEnd) onVideoEnd();
-            }
+          onStateChange: (e) => {
+            if (e.data === window.YT.PlayerState.ENDED && onVideoEnd) onVideoEnd();
           },
         },
       });
     };
 
+    if (!window.YT) {
+      const tag = document.createElement('script');
+      tag.src = 'https://www.youtube.com/iframe_api';
+      document.getElementsByTagName('script')[0].parentNode.insertBefore(
+        tag,
+        document.getElementsByTagName('script')[0]
+      );
+    }
+
     if (window.YT && window.YT.Player) {
-      createPlayer();
+      createPlayers();
     } else {
-      const existingHandler = window.onYouTubeIframeAPIReady;
+      const existing = window.onYouTubeIframeAPIReady;
       window.onYouTubeIframeAPIReady = () => {
-        if (existingHandler) existingHandler();
-        createPlayer();
+        if (existing) existing();
+        createPlayers();
       };
     }
 
     return () => {
-      if (playerRef.current && playerRef.current.destroy) {
-        playerRef.current.destroy();
-      }
+      playerRefs.current.forEach((p) => p?.destroy?.());
+      playerRefs.current = [null, null];
       if (interval) clearInterval(interval);
     };
   }, [videoId]);
 
+  // Sync mute to foreground player only
   useEffect(() => {
-    if (playerRef.current && playerRef.current.mute) {
-      if (isMuted) {
-        playerRef.current.mute();
-      } else {
-        playerRef.current.unMute();
-      }
-    }
+    const p = playerRefs.current[1];
+    if (!p) return;
+    isMuted ? p.mute?.() : p.unMute?.();
   }, [isMuted]);
 
+  // Sync play/pause to both players
   useEffect(() => {
-    if (playerRef.current && playerRef.current.playVideo && playerRef.current.pauseVideo) {
-      if (isPlaying) {
-        playerRef.current.playVideo();
-      } else {
-        playerRef.current.pauseVideo();
-      }
-    }
+    playerRefs.current.forEach((p) => {
+      if (!p) return;
+      isPlaying ? p.playVideo?.() : p.pauseVideo?.();
+    });
   }, [isPlaying]);
 
   return (
     <Box position="absolute" inset={0} overflow="hidden" bg="black">
+
+      {/* ── Ambient blurred video layer — same video, scaled 220% + blurred ── */}
+      {/* Fills the black letterbox bars with live, moving video colour */}
       <Box
-        ref={containerRef}
+        position="absolute"
+        inset={0}
+        zIndex={0}
+        overflow="hidden"
+        pointerEvents="none"
+      >
+        <Box
+          ref={(el) => { containerRefs.current[0] = el; }}
+          position="absolute"
+          top="50%"
+          left="50%"
+          w="100%"
+          h="100%"
+          transform="translate(-50%, -50%) scale(2.5)"
+          filter="blur(55px) brightness(0.5) saturate(1.6)"
+          style={{ willChange: 'transform' }}
+        />
+      </Box>
+
+      {/* ── Main crisp foreground video ── */}
+      <Box
+        ref={(el) => { containerRefs.current[1] = el; }}
         w="100%"
         h="100%"
         position="absolute"
@@ -110,8 +138,10 @@ const BackgroundPlayer = ({ videoId, backdrop, isMuted, isPlaying, onToggleMute,
         transform="translate(-50%, -50%) scale(1.4)"
         pointerEvents="none"
         filter="brightness(1.3) contrast(1.1) saturate(1.1)"
+        zIndex={1}
       />
 
+      {/* Loading backdrop — fades out when player is ready */}
       <AnimatePresence>
         {!isReady && (
           <Box
@@ -121,7 +151,7 @@ const BackgroundPlayer = ({ videoId, backdrop, isMuted, isPlaying, onToggleMute,
             transition={{ duration: 1.5 }}
             position="absolute"
             inset={0}
-            zIndex={1}
+            zIndex={2}
             bg="black"
           >
             <Image
@@ -136,33 +166,31 @@ const BackgroundPlayer = ({ videoId, backdrop, isMuted, isPlaying, onToggleMute,
         )}
       </AnimatePresence>
 
+      {/* Vignette */}
       <Box
         position="absolute"
         inset={0}
-        bgGradient="radial(circle at center, transparent 30%, rgba(0,0,0,0.2) 100%)"
+        bgGradient="radial(circle at center, transparent 30%, rgba(0,0,0,0.15) 100%)"
         pointerEvents="none"
-        zIndex={2}
-      />
-      
-      {/* Top and Bottom Masks to hide YouTube UI artifacts during load/transitions */}
-      <Box 
-        position="absolute" 
-        top={0} 
-        left={0} 
-        right={0} 
-        h="150px" 
-        bgGradient="linear(to-b, black, transparent)" 
-        pointerEvents="none" 
         zIndex={3}
       />
-      <Box 
-        position="absolute" 
-        bottom={0} 
-        left={0} 
-        right={0} 
-        h="150px" 
-        bgGradient="linear(to-t, black, transparent)" 
-        pointerEvents="none" 
+
+      {/* Top fade — lighter because blur layer now fills it with colour */}
+      <Box
+        position="absolute"
+        top={0} left={0} right={0}
+        h="140px"
+        bgGradient="linear(to-b, rgba(0,0,0,0.65), transparent)"
+        pointerEvents="none"
+        zIndex={3}
+      />
+      {/* Bottom fade */}
+      <Box
+        position="absolute"
+        bottom={0} left={0} right={0}
+        h="140px"
+        bgGradient="linear(to-t, rgba(0,0,0,0.65), transparent)"
+        pointerEvents="none"
         zIndex={3}
       />
 

@@ -31,6 +31,20 @@ export const tmdbApi = {
       params: { append_to_response: 'credits,videos,similar,images,reviews,recommendations' } 
     }),
 
+  // Get TV show details
+  getTVDetails: (tvId) => 
+    api.get(`/tv/${tvId}`, { 
+      params: { append_to_response: 'credits,videos,similar,images,reviews,recommendations' } 
+    }),
+
+  // Get popular TV shows
+  getPopularTV: (page = 1) => 
+    api.get('/tv/popular', { params: { page } }),
+
+  // Get top rated TV shows
+  getTopRatedTV: (page = 1) => 
+    api.get('/tv/top_rated', { params: { page } }),
+
   // Search movies
   searchMovies: (query, page = 1) => 
     api.get('/search/movie', { params: { query, page } }),

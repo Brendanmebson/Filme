@@ -68,6 +68,21 @@ const AppContent = () => {
               } 
             />
             <Route 
+              path="/tv/:id" 
+              element={
+                <Box
+                  as={motion.div}
+                  key="tv-detail"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <MovieDetail />
+                </Box>
+              } 
+            />
+            <Route 
               path="/trending" 
               element={
                 <Box

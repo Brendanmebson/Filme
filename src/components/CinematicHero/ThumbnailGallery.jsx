@@ -45,7 +45,7 @@ const ThumbnailGallery = ({ movies, currentIndex, onSelect }) => {
       transform="translateY(-50%)"
       zIndex={10}
       textAlign="right"
-      display="flex"
+      display={{ base: 'none', lg: 'flex' }}
       flexDirection="column"
       alignItems="flex-end"
       gap={8}

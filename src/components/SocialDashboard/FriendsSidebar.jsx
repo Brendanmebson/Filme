@@ -8,7 +8,8 @@ import {
   Flex, 
   Icon, 
   Button,
-  Circle
+  Circle,
+  Badge
 } from '@chakra-ui/react';
 import { Avatar } from '../ui/avatar';
 import { motion } from 'framer-motion';
@@ -29,7 +30,6 @@ const FriendItem = ({ name, avatar, status, activity, isLive, delay }) => {
       role="group"
       bg={isLive ? "rgba(120, 100, 255, 0.08)" : "transparent"}
       _hover={{ bg: "whiteAlpha.100" }}
-      transition="all 0.3s"
     >
       <Flex align="center" justify="space-between">
         <HStack gap={3}>
@@ -105,14 +105,14 @@ const FriendsSidebar = () => {
       bg="rgba(255, 255, 255, 0.02)"
       backdropFilter="blur(20px)"
       rounded="3xl"
-      p={6}
+      p={{ base: 4, md: 6 }}
       border="1px solid"
       borderColor="whiteAlpha.100"
       boxShadow="0 20px 40px rgba(0,0,0,0.4)"
       position="relative"
       overflow="hidden"
     >
-      <Flex justify="space-between" align="center" mb={10}>
+      <Flex justify="space-between" align="center" mb={{ base: 4, md: 10 }}>
         <Heading size="xs" color="white" fontWeight="black" letterSpacing="widest">FRIENDS</Heading>
         <Button 
           variant="link" 
@@ -125,7 +125,55 @@ const FriendsSidebar = () => {
         </Button>
       </Flex>
 
-      <VStack gap={4} align="stretch">
+      {/* Mobile & Tablet: Horizontal scrolling avatar list (Instagram/Facebook Stories style) */}
+      <Box
+        display={{ base: 'flex', lg: 'none' }}
+        overflowX="auto"
+        gap={5}
+        pb={2}
+        css={{
+          '&::-webkit-scrollbar': { display: 'none' },
+          scrollbarWidth: 'none'
+        }}
+      >
+        {friends.map((friend) => (
+          <VStack key={friend.name} gap={1} minW="70px" align="center" flexShrink={0}>
+            <Box position="relative">
+              <Avatar size="md" src={friend.avatar} name={friend.name} />
+              <Circle 
+                size="12px" 
+                bg={friend.status === 'online' ? 'green.500' : 'gray.500'} 
+                position="absolute"
+                bottom="0"
+                right="0"
+                border="2px solid #050505"
+                zIndex={2}
+              />
+              {friend.isLive && (
+                <Circle 
+                  size="10px" 
+                  bg="red.500" 
+                  position="absolute" 
+                  top="0" 
+                  right="0" 
+                  border="2px solid #050505"
+                />
+              )}
+            </Box>
+            <Text fontSize="2xs" fontWeight="bold" color="white" noOfLines={1} textAlign="center" maxW="70px">
+              {friend.name.split(' ')[0]}
+            </Text>
+            {friend.isLive && (
+              <Badge bg="red.500" color="white" fontSize="3xs" px={1.5} py={0} rounded="full" transform="scale(0.85)">
+                LIVE
+              </Badge>
+            )}
+          </VStack>
+        ))}
+      </Box>
+
+      {/* Desktop: Vertical list */}
+      <VStack gap={4} align="stretch" display={{ base: 'none', lg: 'flex' }}>
         {friends.map((friend, i) => (
           <FriendItem key={friend.name} {...friend} delay={i * 0.1} />
         ))}

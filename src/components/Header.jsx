@@ -98,6 +98,46 @@ const Header = () => {
             >
               HOME
             </Link>
+
+            <Link
+              as={RouterLink}
+              to="/trending"
+              px={4}
+              py={2}
+              rounded="full"
+              fontSize="xs"
+              fontWeight="black"
+              letterSpacing="widest"
+              bg={isActive('/trending') ? 'purple.600' : 'transparent'}
+              color="white"
+              boxShadow={isActive('/trending') ? '0 0 15px rgba(120, 100, 255, 0.4)' : 'none'}
+              _hover={{ 
+                bg: isActive('/trending') ? 'purple.700' : 'whiteAlpha.100',
+                textDecoration: 'none'
+              }}
+            >
+              TRENDING
+            </Link>
+
+            <Link
+              as={RouterLink}
+              to="/best-of-month"
+              px={4}
+              py={2}
+              rounded="full"
+              fontSize="xs"
+              fontWeight="black"
+              letterSpacing="widest"
+              bg={isActive('/best-of-month') ? 'purple.600' : 'transparent'}
+              color="white"
+              boxShadow={isActive('/best-of-month') ? '0 0 15px rgba(120, 100, 255, 0.4)' : 'none'}
+              _hover={{ 
+                bg: isActive('/best-of-month') ? 'purple.700' : 'whiteAlpha.100',
+                textDecoration: 'none'
+              }}
+            >
+              BEST OF MONTH
+            </Link>
             
             <Link
               as={RouterLink}
@@ -118,17 +158,6 @@ const Header = () => {
             >
               WATCHLIST
             </Link>
-
-            {/* Mobile Search Button */}
-            <IconButton 
-              display={{ base: 'flex', md: 'none' }}
-              aria-label="Search"
-              variant="ghost"
-              color="gray.300"
-              _hover={{ color: 'white', bg: 'gray.800' }}
-              onClick={() => navigate('/search')}
-              icon={<Search />}
-            />
           </HStack>
 
           {/* Mobile Hamburger Menu */}

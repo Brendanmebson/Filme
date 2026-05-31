@@ -5,7 +5,14 @@ import { Play, Pause } from 'lucide-react';
 
 const ContentArea = ({ movie }) => {
   return (
-    <Box position="absolute" bottom="80px" left="40px" zIndex={10} maxW="600px">
+    <Box
+      position="absolute"
+      bottom={{ base: '90px', md: '80px' }}
+      left={{ base: 4, md: '40px' }}
+      right={{ base: 4, md: 'auto' }}
+      zIndex={10}
+      maxW={{ base: '100%', md: '600px' }}
+    >
       <motion.div
         key={movie.id}
         initial={{ opacity: 0, y: 30 }}

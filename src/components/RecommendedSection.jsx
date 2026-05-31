@@ -62,10 +62,16 @@ const RecommendedSection = ({ movies }) => {
 
       <Container maxW="container.2xl" px={{ base: 6, md: 12 }}>
         {/* Header Area */}
-        <Flex justify="space-between" align="flex-end" mb={10}>
+        <Flex 
+          direction={{ base: 'column', md: 'row' }}
+          justify="space-between" 
+          align={{ base: 'flex-start', md: 'flex-end' }} 
+          gap={{ base: 6, md: 0 }}
+          mb={10}
+        >
           <Heading
             as="h2"
-            fontSize={{ base: "3xl", md: "5xl" }}
+            fontSize={{ base: "2xl", md: "5xl" }}
             fontWeight="black"
             color="white"
             letterSpacing="tight"
@@ -73,24 +79,24 @@ const RecommendedSection = ({ movies }) => {
             RECOMMENDED
           </Heading>
 
-          <HStack gap={8}>
-            <HStack gap={3}>
-              <Text color="whiteAlpha.600" fontSize="sm" fontWeight="bold">My services</Text>
-              <Switch colorScheme="purple" size="md" defaultChecked />
-            </HStack>
-
+          <HStack 
+            gap={{ base: 4, md: 8 }} 
+            w={{ base: '100%', md: 'auto' }}
+            justify={{ base: 'space-between', md: 'flex-end' }}
+          >
             <Button
               variant="outline"
               color="whiteAlpha.700"
               borderColor="whiteAlpha.300"
               bg="whiteAlpha.50"
-              rounded="2xl"
-              px={6}
-              py={6}
-              fontSize="sm"
+              rounded={{ base: "lg", md: "2xl" }}
+              px={{ base: 3, md: 6 }}
+              py={{ base: 2, md: 6 }}
+              h={{ base: '32px', md: 'auto' }}
+              fontSize={{ base: "2xs", md: "sm" }}
               fontWeight="bold"
               onClick={() => navigate('/recommended')}
-              rightIcon={<Icon as={ArrowUpRight} boxSize={4} />}
+              rightIcon={<Icon as={ArrowUpRight} boxSize={{ base: 3, md: 4 }} />}
               _hover={{ bg: "whiteAlpha.200", color: "white" }}
             >
               SHOW ALL
@@ -99,7 +105,8 @@ const RecommendedSection = ({ movies }) => {
             <HStack gap={2}>
               <IconButton
                 aria-label="Previous"
-                icon={<ChevronLeft size={24} />}
+                icon={<Icon as={ChevronLeft} boxSize={{ base: 5, md: 6 }} />}
+                size={{ base: 'sm', md: 'md' }}
                 variant="outline"
                 borderColor="whiteAlpha.300"
                 rounded="full"
@@ -109,7 +116,8 @@ const RecommendedSection = ({ movies }) => {
               />
               <IconButton
                 aria-label="Next"
-                icon={<ChevronRight size={24} />}
+                icon={<Icon as={ChevronRight} boxSize={{ base: 5, md: 6 }} />}
+                size={{ base: 'sm', md: 'md' }}
                 variant="outline"
                 borderColor="whiteAlpha.300"
                 rounded="full"
@@ -125,7 +133,7 @@ const RecommendedSection = ({ movies }) => {
         <Box
           ref={listRef}
           display="flex"
-          gap={8}
+          gap={{ base: 4, md: 8 }}
           overflowX="auto"
           pb={10}
           css={{

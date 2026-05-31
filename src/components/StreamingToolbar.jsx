@@ -21,7 +21,7 @@ const StreamingToolbar = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
 
-  const tabs = ['MOVIES/TV SHOWS', 'NEWS FEED', 'WATCHLIST'];
+  const tabs = ['DISCOVER', 'TRENDING', 'BEST SELECTIONS', 'NEWS FEED', 'WATCHLIST'];
   const streamingLogos = [
     { name: 'Netflix', logo: 'https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg' },
     { name: 'HBO', logo: 'https://upload.wikimedia.org/wikipedia/commons/d/de/HBO_logo.svg' },
@@ -29,7 +29,9 @@ const StreamingToolbar = () => {
   ];
 
   const handleTabClick = (tab) => {
-    if (tab === 'MOVIES/TV SHOWS') navigate('/');
+    if (tab === 'DISCOVER') navigate('/');
+    if (tab === 'TRENDING') navigate('/trending');
+    if (tab === 'BEST SELECTIONS') navigate('/best-of-month');
     if (tab === 'WATCHLIST') navigate('/watchlist');
     if (tab === 'NEWS FEED') {
       navigate('/');
@@ -60,7 +62,7 @@ const StreamingToolbar = () => {
     >
       <Flex h="100%" align="center" justify="space-between">
         {/* Brand */}
-        <HStack gap={3} mr={8}>
+        <HStack gap={3} mr={8} cursor="pointer" onClick={() => navigate('/')}>
           <Box
             w="30px"
             h="30px"

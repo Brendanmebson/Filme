@@ -49,6 +49,7 @@ const StatsPanel = ({ stats }) => {
       gap={6}
       align="start"
       zIndex={10}
+      display={{ base: 'none', md: 'flex' }}
     >
       <StatItem icon={Eye} value={stats.views} delay={0.8} />
       <StatItem icon={Star} value={stats.rating} delay={1.0} />

@@ -135,9 +135,9 @@ const CinematicHero = () => {
       {/* Central Play Button */}
       <Box
         position="absolute"
-        top="50%"
+        top={{ base: '40%', md: '50%' }}
         left="50%"
-        transform="translate(-50%, -50%)"
+        transform={{ base: 'translate(-50%, -50%)', md: 'translate(-50%, -50%)' }}
         zIndex={20}
       >
         <motion.div
@@ -174,13 +174,14 @@ const CinematicHero = () => {
 
       <ProgressBar progress={progress} />
 
-      {/* Bottom Center Expand Button */}
+      {/* Bottom Center Expand Button — desktop only */}
       <Box
         position="absolute"
         bottom="40px"
         left="50%"
         transform="translateX(-50%)"
         zIndex={10}
+        display={{ base: 'none', md: 'block' }}
       >
         <IconButton
           aria-label="Expand"
@@ -199,6 +200,64 @@ const CinematicHero = () => {
             </Box>
           }
           _hover={{ bg: 'whiteAlpha.200', transform: 'translateY(-2px)' }}
+        />
+      </Box>
+
+      {/* Mobile-only: bottom nav strip for switching films */}
+      <Box
+        display={{ base: 'flex', lg: 'none' }}
+        position="absolute"
+        bottom={0}
+        left={0}
+        right={0}
+        zIndex={10}
+        bg="linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 100%)"
+        px={4}
+        pb={4}
+        pt={10}
+        alignItems="center"
+        justifyContent="space-between"
+        gap={2}
+      >
+        {/* Prev arrow */}
+        <IconButton
+          aria-label="Previous"
+          icon={<Box as="span" fontSize="lg" lineHeight={1}>‹</Box>}
+          variant="ghost"
+          color="whiteAlpha.700"
+          _hover={{ color: 'white' }}
+          rounded="full"
+          size="sm"
+          onClick={() => setCurrentIndex((prev) => (prev - 1 + movies.length) % movies.length)}
+        />
+
+        {/* Dot indicators */}
+        <Box display="flex" gap={1.5} alignItems="center">
+          {movies.slice(0, 8).map((_, i) => (
+            <Box
+              key={i}
+              as="button"
+              onClick={() => setCurrentIndex(i)}
+              w={currentIndex === i ? '20px' : '6px'}
+              h="6px"
+              rounded="full"
+              bg={currentIndex === i ? 'white' : 'whiteAlpha.400'}
+              transition="all 0.3s"
+              cursor="pointer"
+            />
+          ))}
+        </Box>
+
+        {/* Next arrow */}
+        <IconButton
+          aria-label="Next"
+          icon={<Box as="span" fontSize="lg" lineHeight={1}>›</Box>}
+          variant="ghost"
+          color="whiteAlpha.700"
+          _hover={{ color: 'white' }}
+          rounded="full"
+          size="sm"
+          onClick={() => setCurrentIndex((prev) => (prev + 1) % movies.length)}
         />
       </Box>
     </Box>
