@@ -27,7 +27,7 @@ const BackgroundPlayer = ({ videoId, backdrop, isMuted, isPlaying, onToggleMute,
     setIsReady(false);
 
     const createPlayer = () => {
-      if (!containerRef.current) return;
+      if (!containerRef.current || !videoId || videoId === 'none') return;
       playerRef.current = new window.YT.Player(containerRef.current, {
         videoId,
         playerVars,
@@ -57,6 +57,10 @@ const BackgroundPlayer = ({ videoId, backdrop, isMuted, isPlaying, onToggleMute,
         },
       });
     };
+
+    if (!videoId || videoId === 'none') {
+      return;
+    }
 
     if (!window.YT || !window.YT.Player) {
       if (!document.getElementById('yt-iframe-api')) {
