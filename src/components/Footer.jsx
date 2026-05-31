@@ -16,6 +16,7 @@ import {
 } from '@chakra-ui/react';
 import { Link as RouterLink } from 'react-router-dom';
 import { Facebook, Twitter, Instagram, Youtube, Mail, MapPin, Phone } from 'lucide-react';
+import logoImg from '../assets/video-player.png';
 
 const Footer = () => {
   return (
@@ -36,7 +37,7 @@ const Footer = () => {
                 justifyContent="center"
                 boxShadow="0 0 20px rgba(120, 100, 255, 0.4)"
               >
-                <Image src="/src/assets/video-player.png" alt="Filme" />
+                <Image src={logoImg} alt="Filme" />
               </Box>
               <Heading fontSize="2xl" fontWeight="black" letterSpacing="tighter">
                 Filme
