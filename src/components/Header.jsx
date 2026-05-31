@@ -17,6 +17,7 @@ import {
 import { MenuRoot, MenuTrigger, MenuContent, MenuItem } from './ui/menu';
 import { Menu } from 'lucide-react';
 import SearchBar from './SearchBar';
+import logoImg from '../assets/video-player.png';
 
 const Header = () => {
   const navigate = useNavigate();
@@ -60,7 +61,7 @@ const Header = () => {
               justifyContent="center"
               boxShadow="0 0 20px rgba(120, 100, 255, 0.4)"
             >
-              <Image src="/src/assets/video-player.png" alt="Filme" />
+              <Image src={logoImg} alt="Filme" />
             </Box>
             <Heading
               fontSize="2xl"
