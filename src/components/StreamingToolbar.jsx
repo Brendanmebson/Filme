@@ -16,6 +16,7 @@ import { Search, Bell, Plus, Play, Menu } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
+import logoImg from '../assets/video-player.png';
 
 const StreamingToolbar = () => {
   const navigate = useNavigate();
@@ -73,7 +74,7 @@ const StreamingToolbar = () => {
             justifyContent="center"
             boxShadow="0 0 15px rgba(120, 100, 255, 0.5)"
           >
-            <Image src="/src/assets/video-player.png" alt="Filme" w="18px" />
+            <Image src={logoImg} alt="Filme" w="18px" />
           </Box>
           <Text fontWeight="black" letterSpacing="widest" fontSize="md" color="white" textTransform="uppercase">
             Filme

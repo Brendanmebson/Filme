@@ -1,7 +1,7 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { Box, Circle, IconButton, Spinner, Center } from '@chakra-ui/react';
 import { Play, Pause } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 import BackgroundPlayer from './BackgroundPlayer';
 import StatsPanel from './StatsPanel';
@@ -21,38 +21,33 @@ const CinematicHero = () => {
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState({ currentTime: 0, duration: 0 });
 
+  // Cache for video IDs fetched on demand
+  const videoIdCache = useRef({});
+
   useEffect(() => {
     const fetchHeroData = async () => {
       try {
         setLoading(true);
-        // 1. Get trending movies
+        // Fetch only 5 trending movies — enough to fill the gallery
         const trendingRes = await tmdbApi.getTrendingMovies();
-        const trendingMovies = trendingRes.data.results.slice(0, 15);
+        const trendingMovies = trendingRes.data.results.slice(0, 5);
 
-        // 2. For each movie, fetch details to get trailers
-        const movieDetails = await Promise.all(
-          trendingMovies.map(async (m) => {
-            const detailRes = await tmdbApi.getMovieDetails(m.id);
-            const videos = detailRes.data.videos.results;
-            const trailer = videos.find(v => v.type === 'Trailer' && v.site === 'YouTube') || videos[0];
-            
-            return {
-              id: m.id,
-              title: m.title,
-              year: new Date(m.release_date).getFullYear(),
-              genre: m.genre_ids.map(id => GENRES[id]).slice(0, 2).join(' / '),
-              views: `${(m.popularity / 10).toFixed(1)}k`,
-              rating: m.vote_average.toFixed(2),
-              likes: `${(m.vote_count / 100).toFixed(1)}k`,
-              videoId: trailer?.key,
-              releaseDate: m.release_date,
-              thumbnail: `${TMDB_IMAGE_BASE_URL}/w500${m.poster_path}`,
-              backdrop: `${TMDB_IMAGE_BASE_URL}/w1280${m.backdrop_path}`,
-            };
-          })
-        );
+        // Build movie list WITHOUT fetching individual details yet
+        const movieList = trendingMovies.map((m) => ({
+          id: m.id,
+          title: m.title,
+          year: m.release_date ? new Date(m.release_date).getFullYear() : 'TBA',
+          genre: m.genre_ids.map(id => GENRES[id]).filter(Boolean).slice(0, 2).join(' / '),
+          views: `${(m.popularity / 10).toFixed(1)}k`,
+          rating: m.vote_average.toFixed(2),
+          likes: `${(m.vote_count / 100).toFixed(1)}k`,
+          videoId: null, // loaded on demand
+          releaseDate: m.release_date,
+          thumbnail: `${TMDB_IMAGE_BASE_URL}/w500${m.poster_path}`,
+          backdrop: `${TMDB_IMAGE_BASE_URL}/w1280${m.backdrop_path}`,
+        }));
 
-        setMovies(movieDetails);
+        setMovies(movieList);
       } catch (error) {
         console.error("Failed to fetch cinematic hero data:", error);
       } finally {
@@ -62,6 +57,28 @@ const CinematicHero = () => {
 
     fetchHeroData();
   }, []);
+
+  // Lazy-load the video ID for whichever movie is currently active
+  useEffect(() => {
+    if (movies.length === 0) return;
+    const movie = movies[currentIndex];
+    if (!movie || movie.videoId || videoIdCache.current[movie.id]) return;
+
+    const fetchVideoId = async () => {
+      try {
+        const detailRes = await tmdbApi.getMovieDetails(movie.id);
+        const videos = detailRes.data.videos?.results || [];
+        const trailer = videos.find(v => v.type === 'Trailer' && v.site === 'YouTube') || videos[0];
+        const videoId = trailer?.key || null;
+        videoIdCache.current[movie.id] = videoId || 'none';
+        setMovies(prev => prev.map((m, i) =>
+          i === currentIndex ? { ...m, videoId } : m
+        ));
+      } catch (_) {}
+    };
+
+    fetchVideoId();
+  }, [currentIndex, movies.length]);
 
   const activeMovie = movies[currentIndex];
   const containerRef = React.useRef(null);

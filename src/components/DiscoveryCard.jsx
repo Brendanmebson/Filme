@@ -1,3 +1,6 @@
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Star } from 'lucide-react';
 import { 
   Box, 
   Image, 
@@ -6,12 +9,8 @@ import {
   HStack, 
   Badge, 
   Icon,
-  Circle,
   Flex
 } from '@chakra-ui/react';
-import { motion } from 'framer-motion';
-import { Star } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 
 const DiscoveryCard = ({ movie, delay = 0 }) => {
   const navigate = useNavigate();
@@ -31,17 +30,7 @@ const DiscoveryCard = ({ movie, delay = 0 }) => {
 
   return (
     <Box
-      as={motion.div}
-      whileHover={{ y: -10, scale: 1.05 }}
       onClick={handleClick}
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ 
-        duration: 0.6, 
-        delay: delay,
-        ease: "easeOut"
-      }}
       position="relative"
       minW={{ base: "240px", md: "280px" }}
       h="420px"
@@ -50,6 +39,8 @@ const DiscoveryCard = ({ movie, delay = 0 }) => {
       cursor="pointer"
       role="group"
       boxShadow="0 20px 40px rgba(0,0,0,0.4)"
+      transition="transform 0.3s ease, box-shadow 0.3s ease"
+      _hover={{ transform: 'translateY(-8px) scale(1.03)', boxShadow: '0 30px 60px rgba(0,0,0,0.6)' }}
       _after={{
         content: '""',
         position: 'absolute',

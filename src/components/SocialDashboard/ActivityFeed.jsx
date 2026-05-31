@@ -21,10 +21,6 @@ const ActivityCard = React.forwardRef(function ActivityCard({ user, type, conten
   return (
     <Box
       ref={ref}
-      as={motion.div}
-      initial={{ opacity: 0, y: 30 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, delay }}
       w="100%"
       maxW="100%"
       bg="rgba(255, 255, 255, 0.03)"
@@ -33,8 +29,7 @@ const ActivityCard = React.forwardRef(function ActivityCard({ user, type, conten
       border="1px solid"
       borderColor="whiteAlpha.100"
       _hover={{ bg: "rgba(255, 255, 255, 0.05)", transform: "translateY(-2px)" }}
-      transitionProperty="all"
-      transitionDuration="0.3s"
+      transition="background 0.3s ease, transform 0.3s ease"
     >
       <Flex align="flex-start" justify="space-between" mb={{ base: 3, md: 4 }}>
         <HStack gap={{ base: 2, md: 3 }} align="flex-start" maxW={{ base: "90%", md: "85%" }} flex={1}>

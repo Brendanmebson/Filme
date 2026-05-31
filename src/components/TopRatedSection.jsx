@@ -34,12 +34,6 @@ const TopRatedCard = ({ movie, index }) => {
   return (
     <Link as={RouterLink} to={isTv ? `/tv/${movie.id}` : `/movie/${movie.id}`} _hover={{ textDecoration: 'none' }}>
       <Box
-        as={motion.div}
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.5, delay: index * 0.08 }}
-        whileHover={{ y: -8 }}
         position="relative"
         rounded="2xl"
         overflow="hidden"
@@ -51,6 +45,8 @@ const TopRatedCard = ({ movie, index }) => {
         border="1px solid"
         borderColor="whiteAlpha.100"
         boxShadow="0 10px 40px rgba(0,0,0,0.4)"
+        transition="transform 0.3s ease, box-shadow 0.3s ease"
+        _hover={{ transform: 'translateY(-6px)', boxShadow: '0 20px 50px rgba(0,0,0,0.6)' }}
       >
         {/* Background */}
         <Image

@@ -1,6 +1,5 @@
 import React from 'react';
 import { Link as RouterLink } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { Star, Calendar, Eye } from 'lucide-react';
 import { 
   Box, 
@@ -31,12 +30,6 @@ const MovieCard = ({ movie, index = 0 }) => {
 
   return (
     <Box
-      as={motion.div}
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.5, delay: index * 0.05 }}
-      whileHover={{ y: -10, scale: 1.05 }}
       position="relative"
       rounded="2xl"
       overflow="hidden"
@@ -44,6 +37,8 @@ const MovieCard = ({ movie, index = 0 }) => {
       role="group"
       bg="gray.900"
       boxShadow="0 10px 30px rgba(0,0,0,0.5)"
+      transition="transform 0.3s ease, box-shadow 0.3s ease"
+      _hover={{ transform: 'translateY(-8px) scale(1.03)', boxShadow: '0 20px 40px rgba(0,0,0,0.6)' }}
     >
       <Link as={RouterLink} to={isTv ? `/tv/${movie.id}` : `/movie/${movie.id}`} _hover={{ textDecoration: 'none' }}>
         {/* Poster */}

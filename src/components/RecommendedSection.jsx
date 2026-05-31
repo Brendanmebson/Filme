@@ -2,7 +2,6 @@ import React, { useRef } from 'react';
 import { 
   Box, 
   Heading, 
-  Text, 
   Flex, 
   HStack, 
   Button, 
@@ -10,11 +9,7 @@ import {
   IconButton,
   Container
 } from '@chakra-ui/react';
-import { Switch } from './ui/switch';
 import { ChevronLeft, ChevronRight, ArrowUpRight } from 'lucide-react';
-import { motion } from 'framer-motion';
-
-
 import DiscoveryCard from './DiscoveryCard';
 import { useNavigate } from 'react-router-dom';
 
@@ -38,25 +33,15 @@ const RecommendedSection = ({ movies }) => {
       position="relative"
       overflow="hidden"
     >
-      {/* Background Gradients */}
+      {/* Background Gradient — static, no animation cost */}
       <Box
-        as={motion.div}
-        animate={{
-          opacity: [0.1, 0.2, 0.1],
-          scale: [1, 1.1, 1],
-        }}
-        transition={{
-          duration: 8,
-          repeat: Infinity,
-          ease: "linear"
-        }}
         position="absolute"
         top="-10%"
         left="50%"
         transform="translateX(-50%)"
         w="100%"
         h="800px"
-        bgGradient="radial(circle at 50% 0%, rgba(120, 100, 255, 0.3), transparent 70%)"
+        bgGradient="radial(circle at 50% 0%, rgba(120, 100, 255, 0.15), transparent 70%)"
         pointerEvents="none"
       />
 

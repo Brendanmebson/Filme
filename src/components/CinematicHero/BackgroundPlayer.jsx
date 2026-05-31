@@ -1,17 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Box, IconButton, Image } from '@chakra-ui/react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Box, IconButton } from '@chakra-ui/react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { Volume2, VolumeX } from 'lucide-react';
 
 const BackgroundPlayer = ({ videoId, backdrop, isMuted, isPlaying, onToggleMute, onProgress, onVideoEnd }) => {
   const [isReady, setIsReady] = useState(false);
-  // Index 0 = ambient blur layer (always muted), index 1 = main foreground player
-  const playerRefs = useRef([null, null]);
-  const containerRefs = useRef([null, null]);
+  const playerRef = useRef(null);
+  const containerRef = useRef(null);
+  const intervalRef = useRef(null);
 
-  const makePlayerVars = (muted) => ({
+  const playerVars = {
     autoplay: 1,
-    mute: muted ? 1 : 0,
+    mute: 1, // always start muted (browser policy)
     controls: 0,
     loop: 0,
     playlist: videoId,
@@ -21,38 +21,35 @@ const BackgroundPlayer = ({ videoId, backdrop, isMuted, isPlaying, onToggleMute,
     modestbranding: 1,
     enablejsapi: 1,
     origin: window.location.origin,
-  });
+  };
 
   useEffect(() => {
     setIsReady(false);
-    let interval;
 
-    const createPlayers = () => {
-      // Ambient player — always silent, just visuals
-      playerRefs.current[0] = new window.YT.Player(containerRefs.current[0], {
+    const createPlayer = () => {
+      if (!containerRef.current) return;
+      playerRef.current = new window.YT.Player(containerRef.current, {
         videoId,
-        playerVars: makePlayerVars(true),
-        events: {
-          onReady: (e) => e.target.playVideo(),
-        },
-      });
-
-      // Main foreground player
-      playerRefs.current[1] = new window.YT.Player(containerRefs.current[1], {
-        videoId,
-        playerVars: makePlayerVars(isMuted),
+        playerVars,
         events: {
           onReady: (e) => {
             e.target.playVideo();
             setIsReady(true);
-            interval = setInterval(() => {
-              const p = playerRefs.current[1];
+            // Apply mute state after ready
+            if (!isMuted) {
+              try { e.target.unMute(); } catch (_) {}
+            }
+            // Poll progress every 2s instead of 1s
+            intervalRef.current = setInterval(() => {
+              const p = playerRef.current;
               if (p && p.getCurrentTime) {
-                const currentTime = p.getCurrentTime();
-                const duration = p.getDuration();
-                if (duration > 0) onProgress({ currentTime, duration });
+                try {
+                  const currentTime = p.getCurrentTime();
+                  const duration = p.getDuration();
+                  if (duration > 0) onProgress({ currentTime, duration });
+                } catch (_) {}
               }
-            }, 1000);
+            }, 2000);
           },
           onStateChange: (e) => {
             if (e.data === window.YT.PlayerState.ENDED && onVideoEnd) onVideoEnd();
@@ -61,112 +58,105 @@ const BackgroundPlayer = ({ videoId, backdrop, isMuted, isPlaying, onToggleMute,
       });
     };
 
-    if (!window.YT) {
-      const tag = document.createElement('script');
-      tag.src = 'https://www.youtube.com/iframe_api';
-      document.getElementsByTagName('script')[0].parentNode.insertBefore(
-        tag,
-        document.getElementsByTagName('script')[0]
-      );
-    }
-
-    if (window.YT && window.YT.Player) {
-      createPlayers();
-    } else {
+    if (!window.YT || !window.YT.Player) {
+      if (!document.getElementById('yt-iframe-api')) {
+        const tag = document.createElement('script');
+        tag.id = 'yt-iframe-api';
+        tag.src = 'https://www.youtube.com/iframe_api';
+        document.head.appendChild(tag);
+      }
       const existing = window.onYouTubeIframeAPIReady;
       window.onYouTubeIframeAPIReady = () => {
         if (existing) existing();
-        createPlayers();
+        createPlayer();
       };
+    } else {
+      createPlayer();
     }
 
     return () => {
-      playerRefs.current.forEach((p) => p?.destroy?.());
-      playerRefs.current = [null, null];
-      if (interval) clearInterval(interval);
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      try { playerRef.current?.destroy(); } catch (_) {}
+      playerRef.current = null;
     };
   }, [videoId]);
 
-  // Sync mute to foreground player only
+  // Sync mute
   useEffect(() => {
-    const p = playerRefs.current[1];
+    const p = playerRef.current;
     if (!p) return;
-    isMuted ? p.mute?.() : p.unMute?.();
+    try { isMuted ? p.mute() : p.unMute(); } catch (_) {}
   }, [isMuted]);
 
-  // Sync play/pause to both players
+  // Sync play/pause
   useEffect(() => {
-    playerRefs.current.forEach((p) => {
-      if (!p) return;
-      isPlaying ? p.playVideo?.() : p.pauseVideo?.();
-    });
+    const p = playerRef.current;
+    if (!p) return;
+    try { isPlaying ? p.playVideo() : p.pauseVideo(); } catch (_) {}
   }, [isPlaying]);
 
   return (
     <Box position="absolute" inset={0} overflow="hidden" bg="black">
 
-      {/* ── Ambient blurred video layer — same video, scaled 220% + blurred ── */}
-      {/* Fills the black letterbox bars with live, moving video colour */}
-      <Box
-        position="absolute"
-        inset={0}
-        zIndex={0}
-        overflow="hidden"
-        pointerEvents="none"
-      >
+      {/* Static backdrop shown while video loads — no cost */}
+      {backdrop && (
         <Box
-          ref={(el) => { containerRefs.current[0] = el; }}
           position="absolute"
-          top="50%"
-          left="50%"
-          w="100%"
-          h="100%"
-          transform="translate(-50%, -50%) scale(2.5)"
-          filter="blur(55px) brightness(0.5) saturate(1.6)"
-          style={{ willChange: 'transform' }}
+          inset={0}
+          bgImage={`url(${backdrop})`}
+          bgSize="cover"
+          bgPos="center"
+          filter="brightness(0.5)"
+          zIndex={0}
         />
-      </Box>
+      )}
 
-      {/* ── Main crisp foreground video ── */}
+      {/* Single YouTube player — fills container, scaled slightly for cover */}
       <Box
-        ref={(el) => { containerRefs.current[1] = el; }}
-        w="100%"
-        h="100%"
+        ref={containerRef}
         position="absolute"
         top="50%"
         left="50%"
-        transform="translate(-50%, -50%) scale(1.4)"
-        pointerEvents="none"
-        filter="brightness(1.3) contrast(1.1) saturate(1.1)"
+        // 16:9 cover trick — uses CSS only, no runtime filter
+        style={{
+          width: '177.78vh', // 100vh * (16/9)
+          height: '56.25vw', // 100vw * (9/16)
+          minWidth: '100%',
+          minHeight: '100%',
+          transform: 'translate(-50%, -50%)',
+          pointerEvents: 'none',
+        }}
         zIndex={1}
       />
 
-      {/* Loading backdrop — fades out when player is ready */}
+      {/* Fade in when ready */}
       <AnimatePresence>
         {!isReady && (
           <Box
             as={motion.div}
             initial={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 1.5 }}
+            transition={{ duration: 1.2 }}
             position="absolute"
             inset={0}
             zIndex={2}
             bg="black"
           >
-            <Image
-              src={backdrop}
-              alt="Backdrop"
-              w="100%"
-              h="100%"
-              objectFit="cover"
-              filter="brightness(0.6)"
-            />
+            {backdrop && (
+              <Box
+                w="100%"
+                h="100%"
+                bgImage={`url(${backdrop})`}
+                bgSize="cover"
+                bgPos="center"
+                filter="brightness(0.5)"
+              />
+            )}
           </Box>
         )}
       </AnimatePresence>
 
-      {/* Vignette */}
+      {/* Vignette — cheap radial gradient, no filter */}
       <Box
         position="absolute"
         inset={0}
@@ -175,44 +165,33 @@ const BackgroundPlayer = ({ videoId, backdrop, isMuted, isPlaying, onToggleMute,
         zIndex={3}
       />
 
-      {/* Top fade — lighter because blur layer now fills it with colour */}
+      {/* Top fade */}
       <Box
         position="absolute"
         top={0} left={0} right={0}
         h="140px"
-        bgGradient="linear(to-b, rgba(0,0,0,0.65), transparent)"
+        bgGradient="linear(to-b, rgba(0,0,0,0.7), transparent)"
         pointerEvents="none"
         zIndex={3}
       />
+
       {/* Bottom fade */}
       <Box
         position="absolute"
         bottom={0} left={0} right={0}
         h="140px"
-        bgGradient="linear(to-t, rgba(0,0,0,0.65), transparent)"
+        bgGradient="linear(to-t, rgba(0,0,0,0.7), transparent)"
         pointerEvents="none"
         zIndex={3}
       />
 
+      {/* Left cinematic vignette */}
       <Box
         position="absolute"
         inset={0}
-        bgGradient="to-t"
-        gradientFrom="rgba(0,0,0,0.8)"
-        gradientTo="transparent"
-        gradientStop="50%"
+        bgGradient="linear(to-r, rgba(0,0,0,0.5), transparent 40%)"
         pointerEvents="none"
-        zIndex={4}
-      />
-      <Box
-        position="absolute"
-        inset={0}
-        bgGradient="to-r"
-        gradientFrom="rgba(0,0,0,0.5)"
-        gradientTo="transparent"
-        gradientStop="30%"
-        pointerEvents="none"
-        zIndex={4}
+        zIndex={3}
       />
 
       <IconButton

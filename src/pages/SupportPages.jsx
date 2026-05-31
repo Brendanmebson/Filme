@@ -422,3 +422,14 @@ export const CookieSettings = () => {
     </SupportLayout>
   );
 };
+
+const SupportPages = ({ page }) => {
+  if (page === 'help') return <HelpCenter />;
+  if (page === 'terms') return <TermsOfService />;
+  if (page === 'privacy') return <PrivacyPolicy />;
+  if (page === 'cookies') return <CookieSettings />;
+  return <HelpCenter />;
+};
+
+export default SupportPages;
+
