@@ -115,19 +115,19 @@ const BackgroundPlayer = ({ videoId, backdrop, isMuted, isPlaying, onToggleMute,
         />
       )}
 
-      {/* Single YouTube player — fills container, scaled slightly for cover */}
+      {/* Single YouTube player — fills container, scaled slightly to crop YouTube UI */}
       <Box
         ref={containerRef}
         position="absolute"
         top="50%"
         left="50%"
-        // 16:9 cover trick — uses CSS only, no runtime filter
+        // 16:9 cover trick — scale crops out native YouTube titles & logos
         style={{
           width: '177.78vh', // 100vh * (16/9)
           height: '56.25vw', // 100vw * (9/16)
           minWidth: '100%',
           minHeight: '100%',
-          transform: 'translate(-50%, -50%)',
+          transform: 'translate(-50%, -50%) scale(1.35)',
           pointerEvents: 'none',
         }}
         zIndex={1}
